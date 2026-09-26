@@ -1,0 +1,604 @@
+/* ============================================================
+   WinUI 3 / Fluent UI 组件样式
+   对标 Windows 11 Settings 应用
+   ============================================================ */
+
+/* 壁纸层：纯壁纸 + 透明度，无模糊、无着色层
+   符合 WinUI Mica 语义：壁纸作为底层材质，
+   通过侧边栏/内容区的 rgba 不透明度叠加 SolidBackgroundFillColorBase 色调
+   实现壁纸可见 + 文字可读 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: url('/bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.6;
+}
+
+/* 浅色模式：壁纸被 #f3f3f3 底色冲淡，避免 anime 亮色壁纸刺眼 */
+[data-theme="light"] body::before {
+  opacity: 0.35;
+}
+
+/* 应用容器 */
+.win-app {
+  position: relative;
+  z-index: 1;
+}
+
+/* 内容层 (LayerFillColorDefaultBrush) */
+.win-content-surface {
+  background: var(--win-layer-fill);
+}
+
+/* ============================================================
+   SettingsCard (Windows Settings 核心控件)
+   ============================================================ */
+.win-settings-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: var(--win-card-bg);
+  backdrop-filter: blur(30px) saturate(140%);
+  -webkit-backdrop-filter: blur(30px) saturate(140%);
+  border: 1px solid var(--win-stroke-card);
+  border-radius: var(--win-radius-card);
+  transition: background-color 0.2s var(--win-ease), border-color 0.2s var(--win-ease);
+  text-decoration: none;
+  color: inherit;
+  min-height: 56px;
+  overflow: hidden;
+}
+
+a.win-settings-card {
+  cursor: pointer;
+}
+
+/* Reveal 风格 hover：卡片边缘微光 + 背景变实 */
+a.win-settings-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    400px circle at var(--win-reveal-x, 50%) var(--win-reveal-y, 50%),
+    rgba(255, 255, 255, 0.06),
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.25s var(--win-ease);
+  pointer-events: none;
+}
+
+a.win-settings-card:hover {
+  background: var(--win-card-bg-solid);
+  border-color: var(--win-stroke-secondary);
+}
+
+a.win-settings-card:hover::before {
+  opacity: 1;
+}
+
+a.win-settings-card:active {
+  background: var(--win-subtle-tertiary);
+}
+
+a.win-settings-card:active::before {
+  opacity: 0.5;
+}
+
+/* SettingsCard 左侧图标 */
+.win-settings-card-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  color: var(--win-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.win-settings-card-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* SettingsCard 标题 + 描述 */
+.win-settings-card-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.win-settings-card-title {
+  font-size: var(--win-font-body-strong);
+  font-weight: 600;
+  color: var(--win-text-primary);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.win-settings-card-desc {
+  font-size: var(--win-font-caption);
+  color: var(--win-text-secondary);
+  line-height: 1.4;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* SettingsCard 右侧操作区 */
+.win-settings-card-action {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* SettingsCard 右侧箭头 (chevron) */
+.win-settings-card-chevron {
+  width: 16px;
+  height: 16px;
+  color: var(--win-text-tertiary);
+  flex-shrink: 0;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.25s var(--win-ease), transform 0.25s var(--win-ease);
+}
+
+a.win-settings-card:hover .win-settings-card-chevron {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.win-settings-card-chevron svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+/* ============================================================
+   NavigationView 导航项 (左侧边栏)
+   ============================================================ */
+.win-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px 8px 16px;
+  height: 40px;
+  border-radius: var(--win-radius-control);
+  color: var(--win-text-primary);
+  text-decoration: none;
+  font-size: var(--win-font-body);
+  transition: background-color 0.25s var(--win-ease), color 0.25s var(--win-ease);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  overflow: hidden;
+}
+
+.win-nav-item:hover {
+  background: var(--win-subtle-secondary);
+}
+
+.win-nav-item:active {
+  background: var(--win-subtle-tertiary);
+}
+
+/* 选中态：仅强调色背景，指示条由 .win-nav-indicator 统一渲染 */
+.win-nav-item[aria-current="page"],
+.win-nav-item.is-active {
+  background: var(--win-nav-selected);
+}
+
+.win-nav-item svg,
+.win-nav-item .win-nav-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  fill: currentColor;
+  transition: color 0.2s var(--win-ease);
+}
+
+.win-nav-item[aria-current="page"] svg,
+.win-nav-item.is-active svg {
+  color: var(--win-accent);
+}
+
+.win-nav-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   单一滑动指示器 (Win11 Settings 蓝条)
+   所有导航项共用，通过 transform 位移实现非线性滑动
+   ============================================================ */
+.win-sidebar-nav {
+  position: relative;
+}
+
+.win-nav-indicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 3px;
+  height: 24px;
+  background: var(--win-accent);
+  border-radius: 0 2px 2px 0;
+  transform: translateY(0);
+  /* Win11 弹簧缓动：过冲回弹，非线性 */
+  transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1),
+              height 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background-color 0.3s ease;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.win-nav-indicator.is-visible {
+  opacity: 1;
+}
+
+/* ============================================================
+   ToggleSwitch (Win11 真实开关)
+   ============================================================ */
+.win-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 40px;
+  height: 20px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.win-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+/* 轨道 */
+.win-switch-track {
+  position: absolute;
+  inset: 0;
+  background: var(--win-control-fill-default);
+  border: 1px solid var(--win-stroke-secondary);
+  border-radius: 10px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+/* 拇指 */
+.win-switch-thumb {
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 14px;
+  height: 14px;
+  background: var(--win-control-strong);
+  border-radius: 50%;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease, width 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  z-index: 1;
+}
+
+/* 开启状态 */
+.win-switch input:checked + .win-switch-track {
+  background: var(--win-accent);
+  border-color: var(--win-accent);
+}
+
+.win-switch input:checked + .win-switch-track + .win-switch-thumb {
+  transform: translateX(20px);
+  background: var(--win-text-on-accent);
+}
+
+/* 悬停 */
+.win-switch:hover .win-switch-track {
+  border-color: var(--win-text-secondary);
+}
+
+.win-switch input:checked:hover + .win-switch-track {
+  background: var(--win-accent-secondary);
+  border-color: var(--win-accent-secondary);
+}
+
+/* 按下 */
+.win-switch:active .win-switch-thumb {
+  width: 18px;
+}
+
+.win-switch input:checked:active + .win-switch-track + .win-switch-thumb {
+  transform: translateX(16px);
+}
+
+/* 焦点 */
+.win-switch input:focus-visible + .win-switch-track {
+  outline: 2px solid var(--win-accent);
+  outline-offset: 2px;
+}
+
+/* 主题切换组：太阳 + 开关 + 月亮 */
+.win-theme-toggle-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.win-theme-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  transition: color 0.25s var(--win-ease), opacity 0.25s var(--win-ease);
+}
+
+/* 浅色模式：太阳高亮，月亮暗淡 */
+.win-theme-icon-sun {
+  color: var(--win-text-primary);
+}
+
+.win-theme-icon-moon {
+  color: var(--win-text-tertiary);
+  opacity: 0.5;
+}
+
+/* 深色模式：月亮高亮，太阳暗淡 */
+[data-theme="dark"] .win-theme-icon-sun {
+  color: var(--win-text-tertiary);
+  opacity: 0.5;
+}
+
+[data-theme="dark"] .win-theme-icon-moon {
+  color: var(--win-text-primary);
+  opacity: 1;
+}
+
+/* ============================================================
+   语言切换地球仪按钮 (Win11 紧凑图标按钮)
+   ============================================================ */
+.win-lang-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: var(--win-control-fill-default);
+  border: 1px solid var(--win-stroke-default);
+  border-radius: var(--win-radius-control);
+  color: var(--win-text-secondary);
+  cursor: pointer;
+  transition: background-color 0.2s var(--win-ease), border-color 0.2s var(--win-ease), color 0.2s var(--win-ease);
+  user-select: none;
+}
+
+.win-lang-btn:hover {
+  background: var(--win-control-fill-secondary);
+  border-color: var(--win-stroke-secondary);
+  color: var(--win-text-primary);
+}
+
+.win-lang-btn:active {
+  background: var(--win-subtle-tertiary);
+}
+
+.win-lang-btn:focus-visible {
+  outline: 2px solid var(--win-accent);
+  outline-offset: 1px;
+}
+
+.win-lang-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Flyout 弹出菜单容器 */
+.win-lang-flyout {
+  position: relative;
+  display: inline-flex;
+}
+
+.win-lang-menu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  min-width: 140px;
+  padding: 4px;
+  background: var(--win-menu-bg, var(--win-bg-base));
+  border: 1px solid var(--win-stroke-secondary);
+  border-radius: var(--win-radius-card);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateY(4px) scale(0.98);
+  transform-origin: bottom left;
+  pointer-events: none;
+  transition: opacity 0.18s var(--win-ease), transform 0.2s var(--win-ease-soft, cubic-bezier(0.22, 1, 0.36, 1));
+  z-index: 1000;
+}
+
+[data-theme="dark"] .win-lang-menu {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.win-lang-flyout.is-open .win-lang-menu {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.win-lang-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 10px;
+  background: transparent;
+  border: none;
+  border-radius: var(--win-radius-control);
+  color: var(--win-text-primary);
+  font-size: var(--win-font-body);
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s var(--win-ease);
+}
+
+.win-lang-menu-item:hover {
+  background: var(--win-subtle-secondary);
+}
+
+.win-lang-menu-check {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  color: var(--win-accent);
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.win-lang-menu-check svg {
+  width: 14px;
+  height: 14px;
+}
+
+.win-lang-menu-label {
+  flex: 1;
+}
+
+/* ============================================================
+   通用控件
+   ============================================================ */
+
+/* 头像 */
+.win-avatar {
+  border-radius: var(--win-radius-avatar);
+  object-fit: cover;
+  background: var(--win-bg-secondary);
+}
+
+/* 分割线 */
+.win-divider {
+  border: none;
+  height: 1px;
+  background: var(--win-divider);
+  margin: 8px 0;
+}
+
+/* 按钮 (Button) */
+.win-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px 16px;
+  min-height: 32px;
+  border-radius: var(--win-radius-control);
+  border: 1px solid var(--win-stroke-default);
+  background: var(--win-control-fill-default);
+  color: var(--win-text-primary);
+  font-size: var(--win-font-body);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  text-decoration: none;
+}
+
+.win-btn:hover {
+  background: var(--win-control-fill-secondary);
+  border-color: var(--win-stroke-secondary);
+}
+
+.win-btn:active {
+  background: var(--win-subtle-tertiary);
+}
+
+.win-btn-primary {
+  background: var(--win-accent);
+  color: var(--win-text-on-accent);
+  border-color: var(--win-accent);
+}
+
+.win-btn-primary:hover {
+  background: var(--win-accent-secondary);
+  border-color: var(--win-accent-secondary);
+}
+
+.win-btn-primary:active {
+  background: var(--win-accent-tertiary);
+}
+
+/* ============================================================
+   滚动条 (Win11 风格)
+   ============================================================ */
+.win-scroll::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.win-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.win-scroll::-webkit-scrollbar-thumb {
+  background: var(--win-stroke-secondary);
+  border-radius: 6px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+.win-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--win-text-secondary);
+  background-clip: content-box;
+  border: 3px solid transparent;
+}
+
+/* ============================================================
+   标签 (用于文章标签)
+   ============================================================ */
+.win-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  background: var(--win-nav-selected);
+  color: var(--win-accent);
+  line-height: 1.6;
+}
+
+/* ============================================================
+   页面标题
+   ============================================================ */
+.win-page-title {
+  font-size: var(--win-font-title);
+  font-weight: 600;
+  color: var(--win-text-primary);
+  line-height: 1.2;
+  margin: 0 0 24px 0;
+}
+
+.win-section-title {
+  font-size: var(--win-font-body-strong);
+  font-weight: 600;
+  color: var(--win-text-primary);
+  margin: 0 0 8px 0;
+}

@@ -1,0 +1,47 @@
+---
+interface Props {
+  checked: boolean;
+}
+
+const { checked } = Astro.props;
+---
+
+<div class="win-theme-toggle-group">
+  <svg class="win-theme-icon win-theme-icon-sun" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="4"/>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+  </svg>
+
+  <label class="win-switch" title="Theme">
+    <input type="checkbox" id="theme-toggle" checked={checked} />
+    <span class="win-switch-track"></span>
+    <span class="win-switch-thumb"></span>
+  </label>
+
+  <svg class="win-theme-icon win-theme-icon-moon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+  </svg>
+</div>
+
+<script is:inline>
+  (function () {
+    function sync() {
+      var toggle = document.getElementById('theme-toggle');
+      if (!toggle) return;
+      var actualTheme = document.documentElement.getAttribute('data-theme') || 'light';
+      toggle.checked = actualTheme === 'dark';
+    }
+    sync();
+    document.addEventListener('DOMContentLoaded', sync);
+    // 延迟同步：确保所有内联脚本执行完毕后状态一致
+    setTimeout(sync, 100);
+
+    document.addEventListener('change', function (e) {
+      if (e.target && e.target.id === 'theme-toggle') {
+        var theme = e.target.checked ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        try { localStorage.setItem('theme', theme); } catch (err) {}
+      }
+    });
+  })();
+</script>

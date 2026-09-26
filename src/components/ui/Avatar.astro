@@ -1,0 +1,19 @@
+---
+interface Props {
+  src: string;
+  alt: string;
+  size?: number;
+}
+
+const { src, alt, size = 48 } = Astro.props;
+---
+
+<img
+  src={src}
+  alt={alt}
+  width={size}
+  height={size}
+  class="win-avatar"
+  style={`width:${size}px;height:${size}px;`}
+  loading="eager"
+/>

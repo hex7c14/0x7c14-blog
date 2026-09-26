@@ -1,0 +1,111 @@
+---
+interface Props {
+  current: string;
+  options: { value: string; label: string }[];
+}
+
+const { current, options } = Astro.props;
+---
+
+<div class="win-lang-flyout">
+  <button
+    id="lang-btn"
+    class="win-lang-btn"
+    type="button"
+    aria-label="Select language"
+    aria-haspopup="true"
+    aria-expanded="false"
+    data-current={current}
+  >
+    <svg class="win-lang-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="2" y1="12" x2="22" y2="12"/>
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+  </button>
+
+  <div id="lang-menu" class="win-lang-menu" role="menu">
+    {
+      options.map((opt) => (
+        <button
+          type="button"
+          class="win-lang-menu-item"
+          role="menuitemradio"
+          aria-checked={opt.value === current ? 'true' : 'false'}
+          data-lang={opt.value}
+        >
+          <span class="win-lang-menu-check">
+            {opt.value === current && (
+              <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>
+            )}
+          </span>
+          <span class="win-lang-menu-label">{opt.label}</span>
+        </button>
+      ))
+    }
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    var btn = document.getElementById('lang-btn');
+    var menu = document.getElementById('lang-menu');
+    if (!btn || !menu) return;
+
+    var flyout = btn.closest('.win-lang-flyout');
+    var actualLang = document.documentElement.getAttribute('data-lang') || btn.getAttribute('data-current');
+
+    // 同步菜单项选中态到实际语言
+    menu.querySelectorAll('.win-lang-menu-item').forEach(function (item) {
+      var isCurrent = item.getAttribute('data-lang') === actualLang;
+      item.setAttribute('aria-checked', isCurrent ? 'true' : 'false');
+      var check = item.querySelector('.win-lang-menu-check');
+      if (check) {
+        if (isCurrent) {
+          if (!check.querySelector('svg')) {
+            check.innerHTML = '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>';
+          }
+        } else {
+          check.innerHTML = '';
+        }
+      }
+    });
+
+    function open() {
+      flyout.classList.add('is-open');
+      btn.setAttribute('aria-expanded', 'true');
+    }
+
+    function close() {
+      flyout.classList.remove('is-open');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+
+    function toggle() {
+      if (flyout.classList.contains('is-open')) close();
+      else open();
+    }
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      toggle();
+    });
+
+    menu.querySelectorAll('.win-lang-menu-item').forEach(function (item) {
+      item.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var lang = item.getAttribute('data-lang');
+        try { localStorage.setItem('lang', lang); } catch (err) {}
+        window.location.reload();
+      });
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!flyout.contains(e.target)) close();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') close();
+    });
+  })();
+</script>

@@ -1,0 +1,23 @@
+---
+interface Props {
+  clickable?: boolean;
+  href?: string;
+  class?: string;
+}
+
+const { clickable = false, href, class: className = '' } = Astro.props;
+
+const classes = `win-card ${clickable ? 'win-card-clickable' : ''} ${className}`;
+---
+
+{
+  href ? (
+    <a href={href} class={classes}>
+      <slot />
+    </a>
+  ) : (
+    <div class={classes}>
+      <slot />
+    </div>
+  )
+}

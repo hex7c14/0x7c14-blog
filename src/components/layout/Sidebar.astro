@@ -1,0 +1,152 @@
+---
+import { profileConfig, siteConfig } from '@/config';
+import { getLocale, type Lang } from '@/i18n';
+import Avatar from '@/components/ui/Avatar.astro';
+import NavItem from '@/components/ui/NavItem.astro';
+import ThemeToggle from '@/components/ui/ThemeToggle.astro';
+import LangSelect from '@/components/ui/LangSelect.astro';
+
+interface Props {
+  posts: { slug: string; title: string }[];
+  currentPath: string;
+  lang: Lang;
+  theme: 'light' | 'dark';
+}
+
+const { posts, currentPath, lang, theme } = Astro.props;
+const t = getLocale(lang);
+const isHome = currentPath === '/' || currentPath === '';
+---
+
+<aside class="win-sidebar">
+  <!-- 顶部：头像 + 名称 + 邮箱 -->
+  <div class="win-sidebar-header">
+    <Avatar src={profileConfig.avatar} alt={profileConfig.name} size={40} />
+    <div class="win-sidebar-profile">
+      <div class="win-sidebar-name">{profileConfig.name}</div>
+      <a href={`mailto:${profileConfig.email}`} class="win-sidebar-email">
+        {profileConfig.email}
+      </a>
+    </div>
+  </div>
+
+  <!-- 中部：导航列表 -->
+  <nav class="win-sidebar-nav win-scroll" aria-label="Main navigation">
+    <!-- 单一滑动指示器：所有导航项共用这一条蓝条 -->
+    <span class="win-nav-indicator" aria-hidden="true"></span>
+    <NavItem href="/" label={t.nav.home} icon="home" active={isHome} dataI18n="nav.home" />
+    <div class="win-nav-section">
+      {
+        posts.map((post) => (
+          <NavItem
+            href={`/posts/${post.slug}`}
+            label={post.title}
+            icon="doc"
+            active={currentPath === `/posts/${post.slug}`}
+          />
+        ))
+      }
+    </div>
+  </nav>
+
+  <hr class="win-divider" />
+
+  <!-- 底部：地球仪(语言) + 主题切换 -->
+  <div class="win-sidebar-footer">
+    <div class="win-footer-controls">
+      <LangSelect
+        current={lang}
+        options={[
+          { value: 'zh', label: t.language.zh },
+          { value: 'en', label: t.language.en },
+          { value: 'ja', label: t.language.ja },
+        ]}
+      />
+      <ThemeToggle checked={theme === 'dark'} />
+    </div>
+  </div>
+</aside>
+
+<style>
+  .win-sidebar {
+    width: 280px;
+    min-width: 280px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 16px 12px;
+    border-right: 1px solid var(--win-divider);
+    position: sticky;
+    top: 0;
+    /* 用 token 变量：浅/深色由 :root/[data-theme=dark] 在 fluent-tokens.css
+       切换，避免 scoped style 中祖先属性选择器失效 */
+    background: var(--win-sidebar-bg);
+  }
+
+  .win-sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 8px 12px;
+  }
+
+  .win-sidebar-profile {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .win-sidebar-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--win-text-primary);
+    line-height: 1.3;
+  }
+
+  .win-sidebar-email {
+    font-size: 12px;
+    color: var(--win-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+
+  .win-sidebar-email:hover {
+    text-decoration: underline;
+  }
+
+  .win-sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .win-nav-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 4px;
+  }
+
+  .win-sidebar-footer {
+    padding-top: 8px;
+  }
+
+  .win-footer-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    min-height: 32px;
+  }
+
+  @media (max-width: 768px) {
+    .win-sidebar {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,84 @@
+---
+title: "关于这个博客"
+description: "为什么要把博客做成 Windows 11 设置的样子，以及它背后都用了什么。"
+date: 2026-09-26
+tags: [关于, 博客, WinUI]
+lang: zh
+---
+
+> 写博客这件事，本不必那么无聊。
+
+## 起源
+
+一直想要一个属于自己的角落——既能码字记录技术折腾，也能放些日常碎碎念。市面上的博客主题琳琅满目，但要么太"博客"，要么太"文档"，少了一个让我愿意每天打开它的理由。
+
+直到有一天，盯着 Windows 11 的设置界面发呆时突然想：**为什么不能把博客做成这个样子？**
+
+于是就有了它。
+
+## 它长什么样
+
+打开首页，你会看到一个典型的 Windows 11 设置界面布局：
+
+- **左侧** —— 用户头像、名字、邮箱，下面是一排导航菜单；最底下是语言和主题切换
+- **右侧** —— 根据你选的菜单展示对应内容，首页是个人简介卡片，文章列表是卡片网格
+
+每一个交互细节都尽量贴近原生 Win11：
+
+- Mica 材质（这里用纯壁纸 + 透明度模拟，去掉了模糊只留透光，避免"糊一脸"的廉价感）
+- Reveal 鼠标追踪光效
+- Fluent 标准缓动曲线 `cubic-bezier(0.1, 0.9, 0.2, 1)`
+- 浅色 / 深色主题平滑切换，0.3s 过渡，不刺眼
+
+## 技术栈
+
+不整花活，只选自己顺手且足够现代的：
+
+- [Astro 5](https://astro.build/) —— 静态站点生成，按需岛屿架构
+- [Tailwind CSS](https://tailwindcss.com/) —— 原子化样式
+- [MDX](https://mdxjs.com/) —— 在 Markdown 里写组件
+- [@fluentui/tokens](https://www.npmjs.com/package/@fluentui/tokens) —— Fluent 语义化设计 token
+
+字体用的是 [Maple Mono NF CN](https://github.com/subframe7536/maple-font)，等宽、中文友好、连字优雅，直接内嵌 WOFF2，不依赖任何 CDN。
+
+## 多语言
+
+侧边栏左下角的地球图标可以切换 中文 / English / 日本語，三语文案都在 `src/i18n/` 下。要加一门新语言，只需新增一个 `.ts` 文件：
+
+```ts
+// src/i18n/ko.ts
+export const ko = {
+  nav: { home: '홈', posts: '글' },
+  // ...
+} as const;
+```
+
+## 怎么写文章
+
+文章放在 `src/content/posts/` 目录，每个 `.mdx` 文件就是一篇。Frontmatter 标准字段如下：
+
+```yaml
+---
+title: "文章标题"
+description: "文章简介"
+date: 2026-09-26
+tags: [标签1, 标签2]
+lang: zh
+---
+```
+
+文件名即 URL。比如这篇文章的源文件是 `about.mdx`，访问地址就是 `/posts/about/`。
+
+## 部署
+
+构建产物是纯静态文件，Cloudflare Pages、Vercel、Netlify、GitHub Pages 都能直接托管。我个人走 Cloudflare Pages：
+
+- 构建命令：`pnpm build`
+- 输出目录：`dist`
+- 环境变量：`NODE_VERSION=20`
+
+## 最后
+
+这是一个慢工出细活的项目。不追求功能堆砌，只希望每一次打开它都能让自己会心一笑。
+
+如果你也喜欢这种风格，欢迎在 GitHub 上点个 Star。

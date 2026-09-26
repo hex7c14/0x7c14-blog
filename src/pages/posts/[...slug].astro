@@ -1,0 +1,74 @@
+---
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { siteConfig } from '@/config';
+import { getLocale, type Lang } from '@/i18n';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const posts = await getCollection('posts', ({ data }) => !data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+};
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+
+const allPosts = await getCollection('posts', ({ data }) => !data.draft);
+const posts = allPosts
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .map((p) => ({ slug: p.slug, title: p.data.title }));
+
+const lang = (post.data.lang as Lang) || siteConfig.lang;
+const t = getLocale(lang);
+---
+
+<BaseLayout posts={posts} lang={lang} title={post.data.title} description={post.data.description}>
+  <article class="win-post">
+    <header class="win-post-header">
+      <h1 class="win-post-title">{post.data.title}</h1>
+      <time class="win-post-date" datetime={post.data.date.toISOString()}>
+        {t.home.publishedAt}: {post.data.date.toLocaleDateString(lang)}
+      </time>
+    </header>
+
+    <div class="win-post-content">
+      <div class="prose-win">
+        <Content />
+      </div>
+    </div>
+
+    <a href="/" class="win-btn" data-i18n="post.backToHome">
+      {t.post.backToHome}
+    </a>
+  </article>
+</BaseLayout>
+
+<style>
+  .win-post {
+    max-width: 760px;
+  }
+
+  .win-post-header {
+    margin-bottom: 24px;
+  }
+
+  .win-post-title {
+    font-size: var(--win-font-title);
+    font-weight: 600;
+    color: var(--win-text-primary);
+    margin: 0 0 8px 0;
+    line-height: 1.2;
+  }
+
+  .win-post-date {
+    font-size: var(--win-font-caption);
+    color: var(--win-text-secondary);
+  }
+
+  .win-post-content {
+    margin-top: 8px;
+  }
+</style>

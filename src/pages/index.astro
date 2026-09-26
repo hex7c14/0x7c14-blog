@@ -1,0 +1,82 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SettingsCard from '@/components/ui/SettingsCard.astro';
+import Avatar from '@/components/ui/Avatar.astro';
+import { profileConfig, siteConfig } from '@/config';
+import { getLocale, type Lang } from '@/i18n';
+
+const allPosts = await getCollection('posts', ({ data }) => !data.draft);
+const posts = allPosts
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .map((p) => ({ slug: p.slug, title: p.data.title }));
+
+const lang = (Astro.url.searchParams.get('lang') as Lang) || siteConfig.lang;
+const t = getLocale(lang);
+
+// Fluent 风格文档图标 (Segoe Fluent Icons 风格)
+const docIcon = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/></svg>`;
+const userIcon = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+---
+
+<BaseLayout posts={posts} lang={lang}>
+  <div class="win-page">
+    <h1 class="win-page-title" data-i18n="home.title">{t.home.title}</h1>
+
+    <!-- 作者简介 (SettingsCard 风格) -->
+    <SettingsCard
+      title={profileConfig.name}
+      description={profileConfig.bio}
+      icon={userIcon}
+    >
+      <div slot="action" class="win-author-actions">
+        <Avatar src={profileConfig.avatar} alt={profileConfig.name} size={48} />
+      </div>
+    </SettingsCard>
+
+    <div class="win-card-spacer"></div>
+
+    <!-- 文章列表 -->
+    <h3 class="win-section-title" data-i18n="home.recentPosts">{t.home.recentPosts}</h3>
+    <div class="win-card-list">
+      {
+        posts.length === 0 ? (
+          <SettingsCard title={t.home.noPosts} />
+        ) : (
+          allPosts
+            .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+            .map((post) => (
+              <SettingsCard
+                href={`/posts/${post.slug}`}
+                title={post.data.title}
+                description={post.data.description}
+                icon={docIcon}
+              />
+            ))
+        )
+      }
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .win-page {
+    max-width: 760px;
+  }
+
+  .win-card-spacer {
+    height: 24px;
+  }
+
+  .win-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .win-author-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+</style>

@@ -1,0 +1,297 @@
+@import './fluent-tokens.css';
+@import './win11-components.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Maple Mono NF CN 内嵌字体 */
+@font-face {
+  font-family: "Maple Mono NF CN";
+  src: url("/fonts/MapleMono-NF-CN-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Maple Mono NF CN";
+  src: url("/fonts/MapleMono-NF-CN-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---------- 基础重置 ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* 全局强制 Maple Mono NF CN，含中文 */
+html, body, button, input, select, textarea, code, pre, kbd, samp {
+  font-family: "Maple Mono NF CN", "MapleMono NF CN", "Maple Mono SC NF", "Maple Mono CN", "Maple Mono", "Cascadia Code", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+}
+
+body {
+  font-size: var(--win-font-body);
+  color: var(--win-text-primary);
+  /* 壁纸由 body::before 承载（带模糊），body 仅设底色兜底 */
+  background-color: var(--win-bg-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: color 0.5s var(--win-ease-soft);
+}
+
+a {
+  color: var(--win-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ============================================================
+   页面切换入场动画 (Win11 Settings 风格)
+   内容整体淡入 + 右向左微滑；标题延迟下滑；卡片依次入场
+   ============================================================ */
+
+/* Fluent 标准缓动 */
+:root {
+  --win-ease: cubic-bezier(0.1, 0.9, 0.2, 1);
+  /* 更柔和的出场缓动，用于页面入场 */
+  --win-ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 主内容区入场基态 */
+.win-main {
+  opacity: 0;
+  transform: translateX(24px);
+}
+
+.win-main.win-entered {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.45s var(--win-ease-soft), transform 0.6s var(--win-ease-soft);
+}
+
+/* 页面标题：延迟 120ms 下滑淡入 */
+.win-page-title {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.win-entered .win-page-title {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.4s var(--win-ease-soft) 0.12s, transform 0.5s var(--win-ease-soft) 0.12s;
+}
+
+/* 区块标题：延迟 200ms */
+.win-section-title {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.win-entered .win-section-title {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.4s var(--win-ease-soft) 0.2s, transform 0.5s var(--win-ease-soft) 0.2s;
+}
+
+/* SettingsCard 依次入场：每张延迟 +60ms */
+.win-settings-card {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.win-entered .win-settings-card {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.4s var(--win-ease-soft), transform 0.5s var(--win-ease-soft);
+}
+
+.win-entered .win-settings-card:nth-child(1) { transition-delay: 0.22s, 0.22s; }
+.win-entered .win-settings-card:nth-child(2) { transition-delay: 0.30s, 0.30s; }
+.win-entered .win-settings-card:nth-child(3) { transition-delay: 0.38s, 0.38s; }
+.win-entered .win-settings-card:nth-child(4) { transition-delay: 0.46s, 0.46s; }
+.win-entered .win-settings-card:nth-child(5) { transition-delay: 0.54s, 0.54s; }
+.win-entered .win-settings-card:nth-child(n+6) { transition-delay: 0.62s, 0.62s; }
+
+/* 卡片容器内的子元素(如文章页标题卡内的标题/描述) 不参与外部卡片动画 */
+.win-settings-card .win-settings-card,
+.win-settings-card > * {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+/* 减少动态效果偏好：尊重用户系统设置 */
+@media (prefers-reduced-motion: reduce) {
+  .win-main,
+  .win-page-title,
+  .win-section-title,
+  .win-settings-card {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ---------- 页面标题与区块标题 ---------- */
+.win-page-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--win-text-primary);
+  margin: 0 0 20px 0;
+  line-height: 1.2;
+  letter-spacing: -0.2px;
+}
+
+.win-section-title {
+  font-size: var(--win-font-subtitle);
+  font-weight: 600;
+  color: var(--win-text-primary);
+  margin: 0 0 12px 0;
+}
+
+/* ---------- 标签 ---------- */
+.win-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: var(--win-font-caption);
+  color: var(--win-accent);
+  background: var(--win-accent-subtle);
+  border-radius: var(--win-radius-control);
+}
+
+/* ---------- 按钮 ---------- */
+.win-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 16px;
+  font-size: var(--win-font-body);
+  color: var(--win-text-primary);
+  background: var(--win-control-fill);
+  border: 1px solid var(--win-control-border);
+  border-radius: var(--win-radius-control);
+  cursor: pointer;
+  transition: background 0.2s var(--win-ease);
+}
+
+.win-btn:hover {
+  background: var(--win-control-hover);
+  text-decoration: none;
+}
+
+/* ---------- 文章正文排版 ---------- */
+.prose-win {
+  color: var(--win-text-primary);
+  line-height: 1.7;
+}
+
+.prose-win h1,
+.prose-win h2,
+.prose-win h3,
+.prose-win h4 {
+  color: var(--win-text-primary);
+  font-weight: 600;
+  line-height: 1.3;
+  margin-top: 1.5em;
+  margin-bottom: 0.6em;
+}
+
+.prose-win h1 {
+  font-size: 1.8em;
+  border-bottom: 1px solid var(--win-divider);
+  padding-bottom: 0.3em;
+}
+
+.prose-win h2 {
+  font-size: 1.4em;
+}
+
+.prose-win h3 {
+  font-size: 1.15em;
+}
+
+.prose-win p {
+  margin: 0.8em 0;
+}
+
+.prose-win code {
+  font-family: "Maple Mono NF CN", "MapleMono NF CN", "Maple Mono SC NF", "Maple Mono", "Cascadia Code", monospace;
+  background: var(--win-subtle);
+  padding: 2px 6px;
+  border-radius: var(--win-radius-control);
+  font-size: 0.9em;
+}
+
+.prose-win pre {
+  background: #1e1e1e !important;
+  border-radius: var(--win-radius-card);
+  padding: 16px;
+  overflow-x: auto;
+  border: 1px solid var(--win-divider);
+}
+
+.prose-win pre code {
+  background: transparent;
+  padding: 0;
+  color: #d4d4d4;
+}
+
+.prose-win blockquote {
+  border-left: 3px solid var(--win-accent);
+  margin: 1em 0;
+  padding: 0.4em 1em;
+  color: var(--win-text-secondary);
+  background: var(--win-subtle);
+  border-radius: 0 var(--win-radius-control) var(--win-radius-control) 0;
+}
+
+.prose-win ul,
+.prose-win ol {
+  padding-left: 1.6em;
+  margin: 0.8em 0;
+}
+
+.prose-win table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+.prose-win th,
+.prose-win td {
+  border: 1px solid var(--win-divider);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.prose-win th {
+  background: var(--win-subtle);
+  font-weight: 600;
+}
+
+.prose-win img {
+  max-width: 100%;
+  border-radius: var(--win-radius-card);
+}
+
+.prose-win hr {
+  border: none;
+  height: 1px;
+  background: var(--win-divider);
+  margin: 2em 0;
+}

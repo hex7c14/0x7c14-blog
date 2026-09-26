@@ -1,0 +1,151 @@
+/* ============================================================
+   WinUI 3 / Fluent Design Tokens
+   映射自 WinUI Common_themeresources 笔刷系统
+   支持 Light / Dark / HighContrast
+   ============================================================ */
+
+:root,
+[data-theme="light"] {
+  /* ---- 文字 (TextFillColor*) ---- */
+  --win-text-primary: #1a1a1a;          /* TextFillColorPrimaryBrush */
+  --win-text-secondary: #616161;        /* TextFillColorSecondaryBrush */
+  --win-text-tertiary: #a0a0a0;         /* TextFillColorTertiaryBrush */
+  --win-text-disabled: #c8c8c8;         /* TextFillColorDisabledBrush */
+  --win-text-on-accent: #ffffff;        /* TextOnAccentFillColorPrimaryBrush */
+  --win-accent-text: #0067c0;           /* AccentTextFillColorPrimaryBrush */
+
+  /* ---- 背景与表面 (SolidBackgroundFillColor*) ---- */
+  --win-bg-base: #f3f3f3;               /* SolidBackgroundFillColorBaseBrush (Mica 基底) */
+  --win-bg-secondary: #fbfbfb;          /* SolidBackgroundFillColorSecondaryBrush */
+
+  /* ---- 卡片 (CardBackgroundFillColor*) ---- */
+  --win-card-bg: rgba(255, 255, 255, 0.18);  /* 半透明卡片，覆盖在 Mica 上 */
+  --win-card-bg-solid: #ffffff;         /* 不透明卡片 */
+
+  /* ---- 弹出菜单 (MenuFlyoutBackgroundFill) ---- */
+  --win-menu-bg: #f9f9f9;               /* 不透明菜单背景 */
+
+  /* ---- 内容层 (LayerFillColor* 覆盖在 Mica 上方) ---- */
+  --win-layer-fill: rgba(255, 255, 255, 0.08);  /* LayerFillColorDefaultBrush */
+
+  /* ---- 描边 (ControlStrokeColor* / CardStrokeColor*) ---- */
+  --win-stroke-default: rgba(0, 0, 0, 0.06);    /* ControlStrokeColorDefaultBrush */
+  --win-stroke-secondary: rgba(0, 0, 0, 0.12);  /* ControlStrokeColorSecondaryBrush */
+  --win-stroke-card: rgba(0, 0, 0, 0.06);       /* CardStrokeColorDefaultBrush */
+  --win-divider: rgba(0, 0, 0, 0.06);           /* DividerStrokeColorDefaultBrush */
+
+  /* ---- 细微填充 (SubtleFillColor* 用于行 hover/pressed) ---- */
+  --win-subtle-transparent: transparent;
+  --win-subtle-secondary: rgba(0, 0, 0, 0.04);  /* SubtleFillColorSecondaryBrush (hover) */
+  --win-subtle-tertiary: rgba(0, 0, 0, 0.06);   /* SubtleFillColorTertiaryBrush (pressed) */
+
+  /* ---- 控件填充 (ControlFillColor*) ---- */
+  --win-control-fill-default: rgba(255, 255, 255, 0.70);  /* ControlFillColorDefaultBrush */
+  --win-control-fill-secondary: rgba(249, 249, 249, 0.80); /* ControlFillColorSecondaryBrush */
+  --win-control-strong: #1a1a1a;               /* ControlStrongFillColorDefaultBrush (开关拇指) */
+
+  /* ---- 选中态填充 (ControlAltFillColorQuarternaryBrush) ---- */
+  --win-nav-selected: rgba(0, 103, 192, 0.08);
+
+  /* ---- 强调色 (AccentFillColor* / SystemAccentColor) ---- */
+  --win-accent: #0067c0;                       /* AccentFillColorDefaultBrush */
+  --win-accent-secondary: #1975c7;             /* AccentFillColorSecondaryBrush */
+  --win-accent-tertiary: #005a9e;              /* AccentFillColorTertiaryBrush */
+
+  /* ---- Mica 材质参数 ---- */
+  --win-mica-blur: 24px;
+  --win-mica-saturate: 140%;
+  /* Mica 色调：极轻，让壁纸清晰可见 */
+  --win-mica-tint: rgba(243, 243, 243, 0.04);
+
+  /* ---- 表面层 (Surface layers：侧边栏 / 内容区，纯壁纸+透明度控制) ----
+     语义对标 LayerFillColorDefaultBrush，但本站采用无模糊的纯壁纸+rgba 方案，
+     80% / 60% 不透明：底色 #f3f3f3 保证深色文字可读，壁纸透出作为可见材质 */
+  --win-sidebar-bg: rgba(243, 243, 243, 0.8);
+  --win-main-bg: rgba(243, 243, 243, 0.6);
+}
+
+[data-theme="dark"] {
+  /* ---- 文字 ---- */
+  --win-text-primary: #ffffff;
+  --win-text-secondary: #c8c8c8;
+  --win-text-tertiary: #8a8a8a;
+  --win-text-disabled: #6d6d6d;
+  --win-text-on-accent: #000000;
+  --win-accent-text: #60cdff;
+
+  /* ---- 背景与表面 ---- */
+  --win-bg-base: #202020;
+  --win-bg-secondary: #1f1f1f;
+
+  /* ---- 卡片 ---- */
+  --win-card-bg: rgba(32, 32, 32, 0.18);
+  --win-card-bg-solid: #2b2b2b;
+
+  /* ---- 弹出菜单 ---- */
+  --win-menu-bg: #2b2b2b;               /* 不透明菜单背景 */
+
+  /* ---- 内容层 ---- */
+  --win-layer-fill: rgba(0, 0, 0, 0.06);
+
+  /* ---- 描边 ---- */
+  --win-stroke-default: rgba(255, 255, 255, 0.08);
+  --win-stroke-secondary: rgba(255, 255, 255, 0.14);
+  --win-stroke-card: rgba(255, 255, 255, 0.08);
+  --win-divider: rgba(255, 255, 255, 0.08);
+
+  /* ---- 细微填充 ---- */
+  --win-subtle-transparent: transparent;
+  --win-subtle-secondary: rgba(255, 255, 255, 0.06);
+  --win-subtle-tertiary: rgba(255, 255, 255, 0.08);
+
+  /* ---- 控件填充 ---- */
+  --win-control-fill-default: rgba(255, 255, 255, 0.06);
+  --win-control-fill-secondary: rgba(255, 255, 255, 0.10);
+  --win-control-strong: #f2f2f2;
+
+  /* ---- 选中态 ---- */
+  --win-nav-selected: rgba(96, 205, 255, 0.18);
+
+  /* ---- 强调色 ---- */
+  --win-accent: #60cdff;
+  --win-accent-secondary: #8cd8ff;
+  --win-accent-tertiary: #a7e4ff;
+
+  /* ---- Mica 材质参数 ---- */
+  --win-mica-tint: rgba(15, 15, 25, 0.04);
+
+  /* ---- 表面层：深色模式 #202020 底色 + 80%/60% 不透明 ---- */
+  --win-sidebar-bg: rgba(32, 32, 32, 0.8);
+  --win-main-bg: rgba(32, 32, 32, 0.6);
+}
+
+/* ---- 兼容语义别名（供现有组件使用） ---- */
+:root {
+  --win-bg: var(--win-bg-base);
+  --win-bg-elevated: var(--win-bg-secondary);
+  --win-card-hover: var(--win-subtle-secondary);
+  --win-border: var(--win-stroke-card);
+  --win-border-strong: var(--win-stroke-secondary);
+  --win-nav-hover: var(--win-subtle-secondary);
+  --win-nav-active: var(--win-nav-selected);
+  --win-accent-hover: var(--win-accent-secondary);
+  --win-accent-text-color: var(--win-text-on-accent);
+
+  /* 阴影 (ThemeShadow 等效) */
+  --win-shadow-1: none;                    /* 卡片默认无阴影 */
+  --win-shadow-2: 0 8px 16px rgba(0, 0, 0, 0.14);  /* 弹出层 */
+  --win-shadow-flyout: 0 8px 28px rgba(0, 0, 0, 0.20);
+
+  /* 圆角 (WinUI 规范: ControlCornerRadius=4, OverlayCornerRadius=8) */
+  --win-radius-control: 4px;     /* 按钮、输入框、开关 */
+  --win-radius-card: 8px;        /* 卡片、弹出层 */
+  --win-radius-avatar: 50%;
+
+  /* Fluent 字体梯度 */
+  --win-font-caption: 12px;
+  --win-font-body: 14px;
+  --win-font-body-strong: 14px;
+  --win-font-subtitle: 20px;
+  --win-font-title: 28px;
+}

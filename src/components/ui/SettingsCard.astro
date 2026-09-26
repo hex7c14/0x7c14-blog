@@ -1,0 +1,31 @@
+---
+interface Props {
+  href?: string;
+  title: string;
+  description?: string;
+  icon?: string;
+}
+
+const { href, title, description, icon } = Astro.props;
+
+const chevronSvg = `<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 3.5L10 8l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+const Tag = href ? 'a' : 'div';
+---
+
+<Tag
+  class="win-settings-card"
+  href={href}
+>
+  {icon && (
+    <div class="win-settings-card-icon" set:html={icon} />
+  )}
+  <div class="win-settings-card-body">
+    <h3 class="win-settings-card-title">{title}</h3>
+    {description && <p class="win-settings-card-desc">{description}</p>}
+  </div>
+  {href && (
+    <span class="win-settings-card-chevron" set:html={chevronSvg} />
+  )}
+  <slot name="action" />
+</Tag>

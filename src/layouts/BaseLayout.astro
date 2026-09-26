@@ -1,0 +1,173 @@
+---
+import '@/styles/global.css';
+import { siteConfig } from '@/config';
+import { getLocale, locales, type Lang } from '@/i18n';
+import Sidebar from '@/components/layout/Sidebar.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  posts: { slug: string; title: string }[];
+  lang?: Lang;
+}
+
+const {
+  title,
+  description = siteConfig.subtitle,
+  posts,
+  lang: defaultLang = siteConfig.lang,
+} = Astro.props;
+
+const currentPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const fullTitle = title ? `${title} · ${siteConfig.title}` : siteConfig.title;
+const t = getLocale(defaultLang);
+---
+
+<!doctype html>
+<html lang={defaultLang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- 防闪烁：在渲染前设置主题与语言 -->
+    <script is:inline>
+      (function () {
+        try {
+          var savedTheme = localStorage.getItem('theme');
+          var theme = savedTheme;
+          if (!theme) {
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          document.documentElement.setAttribute('data-theme', theme);
+
+          var savedLang = localStorage.getItem('lang');
+          if (savedLang) {
+            document.documentElement.setAttribute('data-lang', savedLang);
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="win-app">
+      <Sidebar posts={posts} currentPath={currentPath} lang={defaultLang} theme={'light'} />
+      <main class="win-main">
+        <slot />
+      </main>
+    </div>
+
+    <!-- i18n 文本替换 + 控件状态同步 -->
+    <script is:inline define:vars={{ defaultLang, t, locales }}>
+      (function () {
+        var html = document.documentElement;
+        var lang = html.getAttribute('data-lang') || defaultLang;
+        var dict = locales[lang] || locales[defaultLang];
+
+        // 替换所有 data-i18n 文本
+        document.querySelectorAll('[data-i18n]').forEach(function (el) {
+          var key = el.getAttribute('data-i18n');
+          var val = key.split('.').reduce(function (o, k) { return o && o[k]; }, dict);
+          if (val) el.textContent = val;
+        });
+
+        // 同步主题开关
+        var theme = html.getAttribute('data-theme') || 'light';
+        var themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+          themeToggle.checked = theme === 'dark';
+        }
+      })();
+    </script>
+
+    <!-- Reveal 效果：鼠标追踪 + 主题/语言切换交互 -->
+    <script is:inline>
+      (function () {
+        // ---- 页面入场动画：稳定标记 win-entered，不依赖导航 active 状态 ----
+        var main = document.querySelector('.win-main');
+        if (main) {
+          // 双 rAF 确保浏览器已应用初始态(transform/opacity)后再触发过渡
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              main.classList.add('win-entered');
+            });
+          });
+        }
+
+        // ---- 导航指示器：单一蓝条滑动到激活项 ----
+        (function () {
+          var nav = document.querySelector('.win-sidebar-nav');
+          var indicator = nav ? nav.querySelector('.win-nav-indicator') : null;
+          var activeItem = nav ? nav.querySelector('.win-nav-item[aria-current="page"], .win-nav-item.is-active') : null;
+          if (!nav || !indicator || !activeItem) return;
+
+          var navRect = nav.getBoundingClientRect();
+          var itemRect = activeItem.getBoundingClientRect();
+          // 目标位置：相对 nav 顶部的偏移 + 8px 内边距(匹配原指示条上下各留 8px)
+          var targetTop = itemRect.top - navRect.top + 8;
+          var targetHeight = itemRect.height - 16;
+
+          // 从上一次位置(跨页面)或顶部开始，先无过渡定位
+          var lastTop = parseFloat(sessionStorage.getItem('win-nav-indicator-top') || '0');
+          indicator.style.transition = 'none';
+          indicator.style.transform = 'translateY(' + lastTop + 'px)';
+          indicator.style.height = targetHeight + 'px';
+
+          // 下一帧开启过渡并滑到目标位置
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              indicator.style.transition = '';
+              indicator.style.transform = 'translateY(' + targetTop + 'px)';
+              indicator.classList.add('is-visible');
+              sessionStorage.setItem('win-nav-indicator-top', String(targetTop));
+            });
+          });
+        })();
+
+        // Reveal：卡片微光跟随鼠标
+        document.querySelectorAll('a.win-settings-card').forEach(function (card) {
+          card.addEventListener('mousemove', function (e) {
+            var rect = card.getBoundingClientRect();
+            card.style.setProperty('--win-reveal-x', (e.clientX - rect.left) + 'px');
+            card.style.setProperty('--win-reveal-y', (e.clientY - rect.top) + 'px');
+          });
+        });
+
+        // 主题切换
+        var themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+          themeToggle.addEventListener('change', function () {
+            var theme = this.checked ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  .win-app {
+    display: flex;
+    min-height: 100vh;
+    background: transparent;
+  }
+
+  .win-main {
+    flex: 1;
+    min-width: 0;
+    padding: 32px 48px;
+    overflow-x: hidden;
+    /* 用 token 变量：浅/深色由 :root/[data-theme=dark] 在 fluent-tokens.css 切换 */
+    background: var(--win-main-bg);
+  }
+
+  @media (max-width: 768px) {
+    .win-main {
+      padding: 16px;
+    }
+  }
+</style>
