@@ -10,7 +10,7 @@ export const profileConfig: ProfileConfig = {
   avatar: '/avatar.jpg',
   name: '0x7c14',
   email: 'hex7c14@outlook.com',
-  bio: 'ACG & Tech',
+  bio: 'ACG & Tech（手机端还是打开电脑模式浏览吧）',
   links: [
     {
       name: 'GitHub',
