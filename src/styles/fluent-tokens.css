@@ -11,8 +11,8 @@
   --win-text-secondary: #616161;        /* TextFillColorSecondaryBrush */
   --win-text-tertiary: #a0a0a0;         /* TextFillColorTertiaryBrush */
   --win-text-disabled: #c8c8c8;         /* TextFillColorDisabledBrush */
-  --win-text-on-accent: #ffffff;        /* TextOnAccentFillColorPrimaryBrush */
-  --win-accent-text: #0067c0;           /* AccentTextFillColorPrimaryBrush */
+  --win-text-on-accent: var(--win-text-on-accent-auto-light, #ffffff); /* TextOnAccentFillColorPrimaryBrush */
+  --win-accent-text: var(--win-accent-text-auto-light, #0067c0); /* AccentTextFillColorPrimaryBrush */
 
   /* ---- 背景与表面 (SolidBackgroundFillColor*) ---- */
   --win-bg-base: #f3f3f3;               /* SolidBackgroundFillColorBaseBrush (Mica 基底) */
@@ -45,12 +45,12 @@
   --win-control-strong: #1a1a1a;               /* ControlStrongFillColorDefaultBrush (开关拇指) */
 
   /* ---- 选中态填充 (ControlAltFillColorQuarternaryBrush) ---- */
-  --win-nav-selected: rgba(0, 103, 192, 0.08);
+  --win-nav-selected: rgba(var(--win-accent-rgb-light, 0, 103, 192), 0.08);
 
   /* ---- 强调色 (AccentFillColor* / SystemAccentColor) ---- */
-  --win-accent: #0067c0;                       /* AccentFillColorDefaultBrush */
-  --win-accent-secondary: #1975c7;             /* AccentFillColorSecondaryBrush */
-  --win-accent-tertiary: #005a9e;              /* AccentFillColorTertiaryBrush */
+  --win-accent: var(--win-accent-auto-light, #0067c0); /* AccentFillColorDefaultBrush */
+  --win-accent-secondary: var(--win-accent-secondary-auto-light, #1975c7); /* AccentFillColorSecondaryBrush */
+  --win-accent-tertiary: var(--win-accent-tertiary-auto-light, #005a9e); /* AccentFillColorTertiaryBrush */
 
   /* ---- Mica 材质参数 ---- */
   --win-mica-blur: 24px;
@@ -71,8 +71,8 @@
   --win-text-secondary: #c8c8c8;
   --win-text-tertiary: #8a8a8a;
   --win-text-disabled: #6d6d6d;
-  --win-text-on-accent: #000000;
-  --win-accent-text: #60cdff;
+  --win-text-on-accent: var(--win-text-on-accent-auto-dark, #000000);
+  --win-accent-text: var(--win-accent-text-auto-dark, #60cdff);
 
   /* ---- 背景与表面 ---- */
   --win-bg-base: #202020;
@@ -105,12 +105,12 @@
   --win-control-strong: #f2f2f2;
 
   /* ---- 选中态 ---- */
-  --win-nav-selected: rgba(96, 205, 255, 0.18);
+  --win-nav-selected: rgba(var(--win-accent-rgb-dark, 96, 205, 255), 0.18);
 
   /* ---- 强调色 ---- */
-  --win-accent: #60cdff;
-  --win-accent-secondary: #8cd8ff;
-  --win-accent-tertiary: #a7e4ff;
+  --win-accent: var(--win-accent-auto-dark, #60cdff);
+  --win-accent-secondary: var(--win-accent-secondary-auto-dark, #8cd8ff);
+  --win-accent-tertiary: var(--win-accent-tertiary-auto-dark, #a7e4ff);
 
   /* ---- Mica 材质参数 ---- */
   --win-mica-tint: rgba(15, 15, 25, 0.04);

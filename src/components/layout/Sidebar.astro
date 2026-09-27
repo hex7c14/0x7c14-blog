@@ -19,19 +19,32 @@ const isHome = currentPath === '/' || currentPath === '';
 ---
 
 <aside class="win-sidebar">
-  <!-- 顶部：头像 + 名称 + 邮箱 -->
+  <!-- 顶部：个人信息与导航折叠 -->
   <div class="win-sidebar-header">
-    <Avatar src={profileConfig.avatar} alt={profileConfig.name} size={40} />
+    <Avatar src={profileConfig.avatar} alt={profileConfig.name} size={48} />
     <div class="win-sidebar-profile">
       <div class="win-sidebar-name">{profileConfig.name}</div>
       <a href={`mailto:${profileConfig.email}`} class="win-sidebar-email">
         {profileConfig.email}
       </a>
     </div>
+    <button
+      class="win-sidebar-toggle"
+      type="button"
+      aria-label="Toggle navigation menu"
+      aria-expanded="true"
+      aria-controls="site-navigation"
+      title="Collapse navigation"
+      data-sidebar-toggle
+    >
+      <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" fill="none" aria-hidden="true">
+        <path d="M3.5 5.5h13M3.5 10h13M3.5 14.5h13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+      </svg>
+    </button>
   </div>
 
   <!-- 中部：导航列表 -->
-  <nav class="win-sidebar-nav win-scroll" aria-label="Main navigation">
+  <nav id="site-navigation" class="win-sidebar-nav win-scroll" aria-label="Main navigation">
     <!-- 单一滑动指示器：所有导航项共用这一条蓝条 -->
     <span class="win-nav-indicator" aria-hidden="true"></span>
     <NavItem href="/" label={t.nav.home} icon="home" active={isHome} dataI18n="nav.home" />
@@ -71,6 +84,7 @@ const isHome = currentPath === '/' || currentPath === '';
   .win-sidebar {
     width: 280px;
     min-width: 280px;
+    flex: 0 0 280px;
     height: 100vh;
     display: flex;
     flex-direction: column;
@@ -78,16 +92,21 @@ const isHome = currentPath === '/' || currentPath === '';
     border-right: 1px solid var(--win-divider);
     position: sticky;
     top: 0;
+    z-index: 2;
     /* 用 token 变量：浅/深色由 :root/[data-theme=dark] 在 fluent-tokens.css
        切换，避免 scoped style 中祖先属性选择器失效 */
     background: var(--win-sidebar-bg);
+    transition: width 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+                min-width 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+                flex-basis 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+                padding 0.32s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .win-sidebar-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 4px 8px 12px;
+    gap: 14px;
+    padding: 8px 8px 16px;
   }
 
   .win-sidebar-profile {
@@ -97,14 +116,14 @@ const isHome = currentPath === '/' || currentPath === '';
   }
 
   .win-sidebar-name {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--win-text-primary);
     line-height: 1.3;
   }
 
   .win-sidebar-email {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--win-text-secondary);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -114,6 +133,42 @@ const isHome = currentPath === '/' || currentPath === '';
 
   .win-sidebar-email:hover {
     text-decoration: underline;
+  }
+
+  .win-sidebar-toggle {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--win-radius-control);
+    color: var(--win-text-secondary);
+    background: transparent;
+    cursor: pointer;
+    transition: color 0.18s var(--win-ease), background-color 0.18s var(--win-ease);
+  }
+
+  .win-sidebar-toggle:hover {
+    color: var(--win-text-primary);
+    background: var(--win-subtle-secondary);
+  }
+
+  .win-sidebar-toggle:active {
+    background: var(--win-subtle-tertiary);
+  }
+
+  .win-sidebar-toggle:focus-visible {
+    outline: 2px solid var(--win-accent);
+    outline-offset: 1px;
+  }
+
+  .win-sidebar-toggle svg {
+    width: 20px;
+    height: 20px;
   }
 
   .win-sidebar-nav {
@@ -147,6 +202,74 @@ const isHome = currentPath === '/' || currentPath === '';
   @media (max-width: 768px) {
     .win-sidebar {
       display: none;
+    }
+  }
+</style>
+
+<style is:global>
+  html[data-sidebar-collapsed="true"] .win-sidebar {
+    width: 76px;
+    min-width: 76px;
+    flex-basis: 76px;
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  html[data-sidebar-collapsed="true"] .win-sidebar-header {
+    flex-direction: column;
+    gap: 10px;
+    padding: 8px 0 16px;
+  }
+
+  html[data-sidebar-collapsed="true"] .win-sidebar-profile {
+    display: none;
+  }
+
+  html[data-sidebar-collapsed="true"] .win-sidebar-toggle {
+    margin-left: 0;
+  }
+
+  html[data-sidebar-collapsed="true"] .win-sidebar-nav {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  html[data-sidebar-collapsed="true"] .win-nav-item {
+    justify-content: center;
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  html[data-sidebar-collapsed="true"] .win-nav-item span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  html[data-sidebar-collapsed="true"] .win-footer-controls {
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+    padding: 0;
+  }
+
+  html[data-sidebar-collapsed="true"] .win-theme-icon {
+    display: none;
+  }
+
+  html[data-sidebar-collapsed="true"] .win-lang-menu {
+    left: calc(100% + 8px);
+    bottom: 0;
+    transform-origin: bottom left;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .win-sidebar,
+    .win-sidebar-toggle {
+      transition: none !important;
     }
   }
 </style>

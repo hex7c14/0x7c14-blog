@@ -17,7 +17,7 @@ export const ja: LocaleKey = {
   },
   home: {
     title: 'ホーム',
-    about: '自己紹介',
+    githubDescription: 'プロジェクトとコードを見る',
     recentPosts: '記事一覧',
     tags: 'タグ',
     readingTime: '分で読めます',

@@ -1,7 +1,7 @@
 import type { ProfileConfig, SiteConfig } from './types/config';
 
 export const siteConfig: SiteConfig = {
-  title: 'Win11 Blog',
+  title: "0x7c14' blog",
   subtitle: 'A Windows 11 Settings-style blog',
   lang: 'zh',
 };

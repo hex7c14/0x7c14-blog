@@ -17,7 +17,7 @@ export const en: LocaleKey = {
   },
   home: {
     title: 'Home',
-    about: 'About me',
+    githubDescription: 'Explore my projects and code',
     recentPosts: 'Posts',
     tags: 'Tags',
     readingTime: 'min read',

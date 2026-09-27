@@ -30,7 +30,7 @@ const t = getLocale(defaultLang);
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
 
     <!-- 防闪烁：在渲染前设置主题与语言 -->
     <script is:inline>
@@ -46,6 +46,18 @@ const t = getLocale(defaultLang);
           var savedLang = localStorage.getItem('lang');
           if (savedLang) {
             document.documentElement.setAttribute('data-lang', savedLang);
+          }
+
+          var root = document.documentElement;
+          var wallpaperUrl = new URL(localStorage.getItem('blog-wallpaper-url') || '/bg.jpg', location.href);
+          if (wallpaperUrl.protocol === 'http:' || wallpaperUrl.protocol === 'https:') {
+            root.style.setProperty('--win-wallpaper-image', 'url("' + wallpaperUrl.href + '")');
+            var cachedAccent = JSON.parse(localStorage.getItem('wallpaper-accent-cache') || 'null');
+            if (cachedAccent && cachedAccent.url === wallpaperUrl.href && cachedAccent.properties) {
+              Object.keys(cachedAccent.properties).forEach(function (property) {
+                root.style.setProperty(property, cachedAccent.properties[property]);
+              });
+            }
           }
         } catch (e) {}
       })();
@@ -94,6 +106,63 @@ const t = getLocale(defaultLang);
               main.classList.add('win-entered');
             });
           });
+        }
+
+        // 侧栏折叠状态与按钮辅助信息同步
+        var sidebarToggle = document.querySelector('[data-sidebar-toggle]');
+        if (sidebarToggle) {
+          var root = document.documentElement;
+          var sidebar = document.querySelector('.win-sidebar');
+          var isHomePage = location.pathname.replace(/\/+$/, '') === '';
+          var isPostPage = location.pathname.indexOf('/posts/') === 0;
+
+          root.removeAttribute('data-sidebar-collapsed');
+
+          var syncSidebarToggle = function () {
+            var collapsed = root.getAttribute('data-sidebar-collapsed') === 'true';
+            sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
+            sidebarToggle.setAttribute('title', collapsed ? 'Expand navigation' : 'Collapse navigation');
+          };
+
+          var setSidebarCollapsed = function (collapsed) {
+            root.setAttribute('data-sidebar-collapsed', String(collapsed));
+            syncSidebarToggle();
+          };
+
+          syncSidebarToggle();
+          sidebarToggle.addEventListener('click', function () {
+            setSidebarCollapsed(root.getAttribute('data-sidebar-collapsed') !== 'true');
+          });
+
+          if (isHomePage) {
+            var scrollFrame = 0;
+            var userScrollIntent = false;
+
+            window.addEventListener('wheel', function () {
+              userScrollIntent = true;
+            }, { passive: true });
+            window.addEventListener('touchmove', function () {
+              userScrollIntent = true;
+            }, { passive: true });
+            window.addEventListener('keydown', function (event) {
+              if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].indexOf(event.key) !== -1) {
+                userScrollIntent = true;
+              }
+            });
+
+            window.addEventListener('scroll', function () {
+              if (!userScrollIntent || scrollFrame) return;
+              scrollFrame = window.requestAnimationFrame(function () {
+                setSidebarCollapsed(window.scrollY > 48);
+                scrollFrame = 0;
+              });
+            }, { passive: true });
+          } else if (isPostPage && sidebar) {
+            var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            window.setTimeout(function () {
+              setSidebarCollapsed(true);
+            }, reduceMotion ? 0 : 420);
+          }
         }
 
         // ---- 导航指示器：单一蓝条滑动到激活项 ----
@@ -146,6 +215,222 @@ const t = getLocale(defaultLang);
         }
       })();
     </script>
+
+    <script is:inline>
+      (function () {
+        var root = document.documentElement;
+        var accentProperties = [
+          '--win-accent-auto-light',
+          '--win-accent-secondary-auto-light',
+          '--win-accent-tertiary-auto-light',
+          '--win-accent-auto-dark',
+          '--win-accent-secondary-auto-dark',
+          '--win-accent-tertiary-auto-dark',
+          '--win-accent-text-auto-light',
+          '--win-accent-text-auto-dark',
+          '--win-text-on-accent-auto-light',
+          '--win-text-on-accent-auto-dark',
+          '--win-accent-rgb-light',
+          '--win-accent-rgb-dark',
+        ];
+        var currentWallpaper = '';
+        var requestId = 0;
+
+        function hslToRgb(h, s, l) {
+          var chroma = (1 - Math.abs(2 * l - 1)) * s;
+          var section = h / 60;
+          var secondary = chroma * (1 - Math.abs(section % 2 - 1));
+          var offset = l - chroma / 2;
+          var channels = section < 1 ? [chroma, secondary, 0]
+            : section < 2 ? [secondary, chroma, 0]
+            : section < 3 ? [0, chroma, secondary]
+            : section < 4 ? [0, secondary, chroma]
+            : section < 5 ? [secondary, 0, chroma]
+            : [chroma, 0, secondary];
+          return channels.map(function (channel) {
+            return Math.round((channel + offset) * 255);
+          });
+        }
+
+        function luminance(rgb) {
+          var channels = rgb.map(function (value) {
+            var normalized = value / 255;
+            return normalized <= 0.04045
+              ? normalized / 12.92
+              : Math.pow((normalized + 0.055) / 1.055, 2.4);
+          });
+          return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+        }
+
+        function contrastRatio(first, second) {
+          var values = [luminance(first), luminance(second)].sort(function (a, b) { return b - a; });
+          return (values[0] + 0.05) / (values[1] + 0.05);
+        }
+
+        function accessibleTextColor(hue, saturation, background, start, direction) {
+          for (var lightness = start; lightness >= 0 && lightness <= 1; lightness += direction * 0.01) {
+            var rgb = hslToRgb(hue, saturation, lightness);
+            if (contrastRatio(rgb, background) >= 4.5) {
+              return 'hsl(' + hue + ' ' + Math.round(saturation * 100) + '% ' + Math.round(lightness * 100) + '%)';
+            }
+          }
+          return direction < 0 ? '#000000' : '#ffffff';
+        }
+
+        function setColor(rgb) {
+          return 'rgb(' + rgb.join(' ') + ')';
+        }
+
+        function applyAccent(hue, saturation) {
+          var sat = Math.max(0.52, Math.min(0.78, saturation));
+          var light = hslToRgb(hue, sat, 0.42);
+          var lightSecondary = hslToRgb(hue, sat, 0.49);
+          var lightTertiary = hslToRgb(hue, sat, 0.34);
+          var dark = hslToRgb(hue, sat, 0.68);
+          var darkSecondary = hslToRgb(hue, sat, 0.76);
+          var darkTertiary = hslToRgb(hue, sat, 0.60);
+          var lightSurface = [243, 243, 243];
+          var darkSurface = [32, 32, 32];
+          var lightForeground = contrastRatio(light, [0, 0, 0]) > contrastRatio(light, [255, 255, 255])
+            ? '#000000' : '#ffffff';
+          var darkForeground = contrastRatio(dark, [0, 0, 0]) > contrastRatio(dark, [255, 255, 255])
+            ? '#000000' : '#ffffff';
+
+          var properties = {
+            '--win-accent-auto-light': setColor(light),
+            '--win-accent-secondary-auto-light': setColor(lightSecondary),
+            '--win-accent-tertiary-auto-light': setColor(lightTertiary),
+            '--win-accent-auto-dark': setColor(dark),
+            '--win-accent-secondary-auto-dark': setColor(darkSecondary),
+            '--win-accent-tertiary-auto-dark': setColor(darkTertiary),
+            '--win-accent-text-auto-light': accessibleTextColor(hue, sat, lightSurface, 0.42, -1),
+            '--win-accent-text-auto-dark': accessibleTextColor(hue, sat, darkSurface, 0.68, 1),
+            '--win-text-on-accent-auto-light': lightForeground,
+            '--win-text-on-accent-auto-dark': darkForeground,
+            '--win-accent-rgb-light': light.join(', '),
+            '--win-accent-rgb-dark': dark.join(', '),
+          };
+
+          Object.keys(properties).forEach(function (property) {
+            root.style.setProperty(property, properties[property]);
+          });
+          try {
+            localStorage.setItem('wallpaper-accent-cache', JSON.stringify({
+              url: currentWallpaper,
+              properties: properties,
+            }));
+          } catch (error) {
+            console.warn('Could not cache the wallpaper accent color.', error);
+          }
+        }
+
+        function resetAccent() {
+          accentProperties.forEach(function (property) { root.style.removeProperty(property); });
+          try {
+            localStorage.removeItem('wallpaper-accent-cache');
+          } catch (error) {
+            console.warn('Could not clear the cached wallpaper accent color.', error);
+          }
+        }
+
+        function readDominantColor(image) {
+          var canvas = document.createElement('canvas');
+          canvas.width = 64;
+          canvas.height = 64;
+          var context = canvas.getContext('2d', { willReadFrequently: true });
+          if (!context) throw new Error('Canvas 2D context is unavailable.');
+
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          var pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+          var bins = Array.from({ length: 24 }, function () {
+            return { score: 0, hueX: 0, hueY: 0, saturation: 0, count: 0 };
+          });
+
+          for (var i = 0; i < pixels.length; i += 4) {
+            if (pixels[i + 3] < 128) continue;
+            var red = pixels[i] / 255;
+            var green = pixels[i + 1] / 255;
+            var blue = pixels[i + 2] / 255;
+            var max = Math.max(red, green, blue);
+            var min = Math.min(red, green, blue);
+            var delta = max - min;
+            var lightness = (max + min) / 2;
+            if (delta < 0.04 || lightness < 0.12 || lightness > 0.88) continue;
+
+            var saturation = delta / (1 - Math.abs(2 * lightness - 1));
+            var hue;
+            if (max === red) hue = 60 * (((green - blue) / delta) % 6);
+            else if (max === green) hue = 60 * ((blue - red) / delta + 2);
+            else hue = 60 * ((red - green) / delta + 4);
+            if (hue < 0) hue += 360;
+
+            var bin = bins[Math.floor(hue / 15) % bins.length];
+            var weight = saturation * (1 - Math.abs(lightness - 0.5) * 0.5);
+            bin.score += weight;
+            bin.hueX += Math.cos(hue * Math.PI / 180) * weight;
+            bin.hueY += Math.sin(hue * Math.PI / 180) * weight;
+            bin.saturation += saturation * weight;
+            bin.count += weight;
+          }
+
+          var dominant = bins.reduce(function (best, bin) {
+            return bin.score > best.score ? bin : best;
+          }, { score: 0, hueX: 0, hueY: 0, saturation: 0, count: 0 });
+          if (!dominant.count) return null;
+
+          var hue = Math.atan2(dominant.hueY, dominant.hueX) * 180 / Math.PI;
+          if (hue < 0) hue += 360;
+          return { hue: hue, saturation: dominant.saturation / dominant.count };
+        }
+
+        function updateAccent() {
+          var background = window.getComputedStyle(document.body, '::before').backgroundImage;
+          var match = background.match(/url\(["']?(.*?)["']?\)/);
+          if (!match || match[1] === currentWallpaper) return;
+
+          currentWallpaper = match[1];
+          var thisRequest = ++requestId;
+          var image = new Image();
+          image.crossOrigin = 'anonymous';
+          image.onload = function () {
+            if (thisRequest !== requestId) return;
+            try {
+              var color = readDominantColor(image);
+              if (color) applyAccent(color.hue, color.saturation);
+              else resetAccent();
+            } catch (error) {
+              resetAccent();
+              console.warn('Could not sample the wallpaper accent color. Ensure the image allows canvas access.', error);
+            }
+          };
+          image.onerror = function () {
+            if (thisRequest !== requestId) return;
+            resetAccent();
+            console.warn('Could not load wallpaper for accent-color sampling:', currentWallpaper);
+          };
+          image.src = match[1];
+        }
+
+        window.setBlogWallpaper = function (source) {
+          var url = new URL(source, window.location.href);
+          if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+            throw new TypeError('Wallpaper URL must use HTTP or HTTPS.');
+          }
+          try {
+            localStorage.setItem('blog-wallpaper-url', url.href);
+          } catch (error) {
+            console.warn('Could not persist the selected wallpaper.', error);
+          }
+          root.style.setProperty('--win-wallpaper-image', 'url("' + url.href + '")');
+          requestAnimationFrame(updateAccent);
+        };
+
+        var observer = new MutationObserver(updateAccent);
+        observer.observe(root, { attributes: true, attributeFilter: ['style'] });
+        window.addEventListener('wallpaperchange', updateAccent);
+        updateAccent();
+      })();
+    </script>
   </body>
 </html>
 
@@ -160,7 +445,7 @@ const t = getLocale(defaultLang);
     flex: 1;
     min-width: 0;
     padding: 32px 48px;
-    overflow-x: hidden;
+    overflow-x: clip;
     /* 用 token 变量：浅/深色由 :root/[data-theme=dark] 在 fluent-tokens.css 切换 */
     background: var(--win-main-bg);
   }

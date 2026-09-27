@@ -15,7 +15,7 @@ export const zh = {
   },
   home: {
     title: '主页',
-    about: '关于我',
+    githubDescription: '查看我的项目与代码',
     recentPosts: '文章列表',
     tags: '标签',
     readingTime: '阅读时间',
