@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://tomorin.cyou',
+  site: 'https://0x7c14.top',
   integrations: [
     tailwind({ applyBaseStyles: false }),
     mdx(),
